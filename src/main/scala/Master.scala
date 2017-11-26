@@ -1,13 +1,18 @@
-import akka.actor.Actor
+import akka.actor.{Actor, ActorRef}
 
 import scala.collection.mutable
 
 case class Worker(id: String)
 
-class Master extends Actor {
-  val workers: mutable.Queue[String] = mutable.Queue()
+class Master(val schedule: ActorRef) extends Actor {
 
-  def receive = {
-    case Worker(id) => workers.enqueue(id)
+  override def receive: Receive = {
+    case worker: ActorRef => schedule ! worker
+    case job : Job => {
+      for(file <- job.files) {
+        val mapTask = new MapTask(file, job.id, job.mapFunc)
+        this.schedule !
+      }
+    }
   }
 }
