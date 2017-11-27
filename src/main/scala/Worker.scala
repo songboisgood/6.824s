@@ -1,11 +1,17 @@
-import akka.actor.{Actor, ActorRef}
+import akka.actor.{Actor, ActorRef, Props}
 
 class Worker(val schedule: ActorRef) extends Actor {
   override def receive: Receive = {
-    case task : Task => {
-      // TODO create new task actor
-    }
+    case mapTaskArgs: MapTaskArgs =>
+      val taskRef = context.actorOf(Props(new MapTask(mapTaskArgs.jobId,
+        mapTaskArgs.file,
+        mapTaskArgs.mapFunc,
+        mapTaskArgs.numOfReduce,
+        this.schedule)))
 
-    case (MessageType.TaskDone, job_id, task_id) => schedule ! (MessageType.TaskDone, this.sender(), job_id, task_id)
+      taskRef ! MessageType.TaskStart
+
+    case (MessageType.TaskDone, jobId, taskId) =>
+      schedule ! (MessageType.TaskDone, this.sender(), jobId, taskId)
   }
 }

@@ -1,3 +1,4 @@
 object MessageType extends Enumeration {
-  val TaskDone: MessageType.Value = Value
+
+  val TaskDone, TaskStart = Value
 }

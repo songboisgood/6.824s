@@ -1,31 +1,21 @@
 import akka.actor.{ActorSystem, Props}
 import akka.pattern.gracefulStop
 import org.scalatest.{BeforeAndAfter, FunSuite}
+
 import scala.concurrent.duration._
-
-
 import scala.concurrent.{Await, Future}
 
 class MasterTestSuite extends FunSuite with BeforeAndAfter {
 
-  private def mapFunc(file: String) : (String, String) = {
-    return (null, null)
+  private def mapFunc(file: String): List[(String, String)] = {
+    List()
   }
 
-  private def reduceFunc(key : String, value : String) : (String) = {
-    return null;
+  private def reduceFunc(key: String, value: String): (String) = {
+    null
   }
 
   before {
-    val system = ActorSystem("pingpong")
-
-    val master = system.actorOf(Props[Master], "pinger")
-
-    val job = new Job(mapFunc, reduceFunc)
-    master ! job
-
-    val stopped: Future[Boolean] = gracefulStop(master, 5 seconds)
-    Await.result(stopped, 6 seconds)
 
 
   }
@@ -33,6 +23,15 @@ class MasterTestSuite extends FunSuite with BeforeAndAfter {
 
   test("Distributed") {
 
+    val system = ActorSystem("pingpong")
+
+    val master = system.actorOf(Props[Master], "pinger")
+    val files: List[String] = List("a", "b", "c")
+    val job = new Job(files, this.mapFunc, this.reduceFunc, 5)
+    master ! job
+
+    val stopped: Future[Boolean] = gracefulStop(master, 5 seconds)
+    Await.result(stopped, 6 seconds)
   }
 
   after {
