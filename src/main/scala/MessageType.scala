@@ -1,4 +1,7 @@
 object MessageType extends Enumeration {
 
-  val TaskDone, TaskStart = Value
+  val MapTaskDone, ReduceTaskDone, TaskStart,
+  RegisterWorker, JobDone, StartMapTask, StartReduceTask,
+  AddWorker, SubmitJob, ScheduleMapTask, AwakeSchedule,
+  ScheduleReduceTask, StartJob, AssignMapTask, AssignReduceTask = Value
 }

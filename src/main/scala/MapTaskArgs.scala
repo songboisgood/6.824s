@@ -1,6 +1,5 @@
-class MapTaskArgs(val file: String,
-                  val jobId : String,
-                  val mapFunc: String => List[(String, String)],
-                  val numOfReduce: Int) {
-
+case class MapTaskArgs(file: String,
+                  jobId : String,
+                  mapFunc: String => List[(String, String)],
+                  numOfReduce: Int) extends TaskArgs(jobId, numOfReduce){
 }

@@ -1,22 +1,20 @@
-import akka.actor.{Actor, ActorRef}
+import akka.actor.{Actor, ActorRef, Props}
 
-import scala.collection.mutable
+class Master() extends Actor {
 
-class Master(schedule: ActorRef) extends Actor {
+  private val schedule: ActorRef = context.actorOf(Props(new Schedule()))
 
-  // val taskMap : mutable.HashMap[String, Int]
   override def receive: Receive = {
-    case worker: ActorRef => this.schedule ! worker
-    case job: Job =>
-      for (file <- job.files) {
-        val mapTask = new MapTask(file, job.jobId, job.mapFunc, job.numOfReduce, this.schedule)
-        this.schedule ! mapTask
-      }
+    case (MessageType.RegisterWorker, worker: ActorRef) =>
+      this.schedule ! (MessageType.AddWorker, worker)
 
-    case MessageType.TaskDone => {
+    case (MessageType.SubmitJob, jobArgs: JobArgs) =>
+      val jobRef = context.actorOf(Props(new Job(jobArgs, self, sender(), this.schedule)))
 
-    }
+      jobRef ! MessageType.StartJob
 
-
+    case (MessageType.JobDone, jobId: String, jobRef: ActorRef, client: ActorRef) =>
+      client ! (MessageType.JobDone, jobId)
+      context.stop(jobRef)
   }
 }

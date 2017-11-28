@@ -23,12 +23,12 @@ class MasterTestSuite extends FunSuite with BeforeAndAfter {
 
   test("Distributed") {
 
-    val system = ActorSystem("pingpong")
+    val system = ActorSystem("MapReduce")
 
-    val master = system.actorOf(Props[Master], "pinger")
+    val master = system.actorOf(Props[Master], "master")
     val files: List[String] = List("a", "b", "c")
-    val job = new Job(files, this.mapFunc, this.reduceFunc, 5)
-    master ! job
+    /*val job = new Job(files, this.mapFunc, this.reduceFunc, 5)
+    master ! job*/
 
     val stopped: Future[Boolean] = gracefulStop(master, 5 seconds)
     Await.result(stopped, 6 seconds)

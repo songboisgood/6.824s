@@ -2,16 +2,23 @@ import akka.actor.{Actor, ActorRef, Props}
 
 class Worker(val schedule: ActorRef) extends Actor {
   override def receive: Receive = {
-    case mapTaskArgs: MapTaskArgs =>
+    case (MessageType.AssignMapTask, mapTaskArgs: MapTaskArgs) =>
       val taskRef = context.actorOf(Props(new MapTask(mapTaskArgs.jobId,
         mapTaskArgs.file,
         mapTaskArgs.mapFunc,
-        mapTaskArgs.numOfReduce,
-        this.schedule)))
+        mapTaskArgs.numOfReduce)))
 
-      taskRef ! MessageType.TaskStart
+      taskRef ! MessageType.StartMapTask
 
-    case (MessageType.TaskDone, jobId, taskId) =>
-      schedule ! (MessageType.TaskDone, this.sender(), jobId, taskId)
+    case (MessageType.AssignReduceTask, reduceTaskArgs: ReduceTaskArgs) =>
+      val taskRef = context.actorOf(Props(new ReduceTask(
+        reduceTaskArgs.reduceFiles,
+        reduceTaskArgs.jobId,
+        reduceTaskArgs.reduceFunc)))
+
+      taskRef ! MessageType.StartReduceTask
+
+    case (MessageType.MapTaskDone, jobId, taskId) =>
+      schedule ! (MessageType.MapTaskDone, self, jobId, taskId)
   }
 }
